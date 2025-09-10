@@ -1,34 +1,59 @@
+# app.py (CORRECTED VERSION)
+
 import os
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import numpy as np
-import calendar
 import matplotlib
 import shutil
 from flask import Flask, render_template, request, redirect, url_for, session, Response
 from itertools import product
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+import calendar
 import matplotlib.dates as mdates
 from fpdf import FPDF
-import joblib  # <-- ADD THIS LINE
-from datetime import datetime # <-- AND THIS ONE IF YOU MISSED IT
+from datetime import datetime
 
-# Use a non-interactive backend for Matplotlib
+# --- IMPORTANT IMPORTS FOR THE MODEL ---
+import joblib # Use joblib since your code is written for it
+# We will NOT use pickle, as your code seems set up for joblib
+
+# Use a non-interactive backend for Matplotlib (this is good!)
 matplotlib.use('Agg')
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_change_me'
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['PLOTS_FOLDER'] = 'static/plots'
 
-# === MODEL & PREDICTION SETUP (ADD THIS SECTION) ===
-# =============================================================================
-MODEL_PATH = 'voc_spike_model.pkl' # Should now point to your renamed proactive model
-PREDICTIONS_CSV_PATH = 'predictions_proactive.csv' # Use a new log file
+# --- Vercel Warning: Vercel has a read-only filesystem ---
+# These folders can be created, but you may have issues writing to them
+# during a request. This will likely be your next error to solve.
+app.config['UPLOAD_FOLDER'] = '/tmp/uploads' # Use the /tmp directory on Vercel
+app.config['PLOTS_FOLDER'] = '/tmp/static/plots' # Use the /tmp directory on Vercel
 
-# ...
+# --- CORRECTED MODEL LOADING ---
 
-# Define the exact feature order the new model expects
+# 1. Define the path to your model file.
+#    The file 'voc_spike_model.pkl' should be in the same root folder as app.py
+MODEL_PATH = 'voc_spike_model.pkl'
+
+# 2. Load the trained model using joblib
+#    This try/except block is good for handling errors.
+try:
+    model = joblib.load(MODEL_PATH)
+    print(f"✅ Model loaded successfully from {MODEL_PATH}")
+except FileNotFoundError:
+    model = None
+    print(f"⚠️ WARNING: Model file not found at {MODEL_PATH}. Prediction feature will be disabled.")
+except Exception as e:
+    model = None
+    print(f"🚨 An ERROR occurred loading the model: {e}")
+
+
+# --- PATH FOR PREDICTION LOGS ---
+# Vercel Warning: Writing this file will also fail because the filesystem is read-only.
+PREDICTIONS_CSV_PATH = '/tmp/predictions_proactive.csv'
+
+# This is the list of features your model needs. This looks correct.
 MODEL_FEATURES = [
     'Temperature', 'Humidity', 'Occupancy_Status', 'hour_sin', 'hour_cos',
     'dayofweek_sin', 'dayofweek_cos', 'temp_delta1', 'humidity_delta1',
