@@ -1,0 +1,91 @@
+{% extends "base.html" %} {% block title %}Rooms - Sensor Analytics Dashboard{% endblock %} {% block content %}
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-door-open"></i> Room-Specific Analysis
+    </div>
+    <div class="card-body">
+        <p style="font-size: 1.1rem; color: #6c757d; margin-bottom: 2rem;">
+            Select a room below to view detailed sensor analytics, including temperature profiles, occupancy patterns, and air quality monitoring. Each room provides comprehensive insights and downloadable reports.
+        </p>
+
+        {% if rooms %}
+        <div class="room-grid">
+            {% for room in rooms %}
+            <a href="{{ url_for('room_detail', room_name=room) }}" class="room-card">
+                <div style="margin-bottom: 1rem;">
+                    <i class="fas fa-home" style="font-size: 2rem; color: #667eea;"></i>
+                </div>
+                <h3 style="font-size: 1.2rem; font-weight: bold; margin-bottom: 0.5rem;">{{ room }}</h3>
+                <p style="color: #7f8c8d; font-size: 0.9rem; margin: 0;">
+                    View detailed analytics
+                </p>
+                <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 0.5rem;">
+                    <i class="fas fa-thermometer-half" style="color: #ff6b6b;" title="Temperature"></i>
+                    <i class="fas fa-users" style="color: #4ecdc4;" title="Occupancy"></i>
+                    <i class="fas fa-lightbulb" style="color: #feca57;" title="Illuminance"></i>
+                    <i class="fas fa-wind" style="color: #48dbfb;" title="VOC"></i>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+
+        <div class="alert alert-info" style="margin-top: 2rem;">
+            <i class="fas fa-chart-line"></i>
+            <strong>Available Analytics per Room:</strong>
+            <ul style="margin: 0.5rem 0 0 1.5rem;">
+                <li><strong>Temperature Profile:</strong> Daily temperature variations and patterns</li>
+                <li><strong>Occupancy Analysis:</strong> Usage patterns by time periods and weekdays vs weekends</li>
+                <li><strong>Temperature vs Occupancy:</strong> Correlation analysis between room usage and temperature</li>
+                <li><strong>VOC Monitoring:</strong> Air quality trends and spike detection</li>
+                <li><strong>PDF Reports:</strong> Downloadable comprehensive analysis reports</li>
+            </ul>
+        </div>
+
+        {% else %}
+        <div style="text-align: center; padding: 3rem;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #ffc107; margin-bottom: 1rem;"></i>
+            <h3 style="color: #2c3e50; margin-bottom: 1rem;">No Rooms Found</h3>
+            <p style="color: #7f8c8d; margin-bottom: 2rem;">
+                It looks like no sensor data has been uploaded yet. Please upload your CSV files to start analyzing room data.
+            </p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                <i class="fas fa-upload"></i> Upload Sensor Data
+            </a>
+        </div>
+        {% endif %}
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="{{ url_for('overview') }}" class="btn btn-secondary">
+                <i class="fas fa-chart-bar"></i> View Global Overview
+            </a>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary" style="margin-left: 1rem;">
+                <i class="fas fa-home"></i> Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .room-card:hover .fas {
+        transform: scale(1.1);
+        transition: transform 0.2s ease;
+    }
+    
+    .room-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+    
+    @media (max-width: 768px) {
+        .room-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .room-card {
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %}

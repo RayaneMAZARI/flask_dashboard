@@ -1,0 +1,286 @@
+{% extends "base.html" %} {% block title %}Upload Data - Sensor Analytics Dashboard{% endblock %} {% block content %}
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-cloud-upload-alt"></i> Upload Sensor Data Files {% if session.get('uploaded_files') %}
+        <div style="float: right;">
+            <a href="{{ url_for('reset_session') }}" class="btn btn-danger" style="font-size: 0.9rem; padding: 0.5rem 1rem;" onclick="return confirm('Are you sure you want to clear the current session and uploaded data?')">
+                <i class="fas fa-trash"></i> Reset Session
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data" id="uploadForm">
+            <div class="upload-area">
+                <div style="margin-bottom: 2rem;">
+                    <i class="fas fa-file-csv" style="font-size: 4rem; color: #667eea; margin-bottom: 1rem;"></i>
+                    <h3 style="color: #2c3e50; margin-bottom: 0.5rem;">Upload Your Sensor Data</h3>
+                    <p style="color: #7f8c8d;">Please upload all 4 required CSV files to begin analysis</p>
+                </div>
+
+                <div class="file-input-group">
+                    <div class="file-input-wrapper">
+                        <label for="all-files" class="file-label" id="file-label-all">
+                            <i class="fas fa-plus-circle" style="margin-bottom: 0.5rem; display: block; font-size: 1.5rem;"></i>
+                            <strong>Choose All Files</strong>
+                            <small style="display: block; margin-top: 0.5rem; opacity: 0.8;">Select all 4 CSV files at once</small>
+                        </label>
+                        <input type="file" id="all-files" name="csv_files" accept=".csv" multiple required class="file-input">
+                    </div>
+                </div>
+
+                <div id="selected-files" style="margin: 2rem 0; display: none;">
+                    <h4 style="margin-bottom: 1rem; color: #2c3e50;">Selected Files:</h4>
+                    <div id="files-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>File Requirements:</strong>
+                    <ul style="margin: 0.5rem 0 0 1.5rem;">
+                        <li>Upload exactly <strong>4 CSV files</strong> containing: Temperature, Occupancy, Illuminance, and VOC data</li>
+                        <li>Each file should contain columns: <code>timestamp</code>, <code>Room</code>, and the respective sensor measurement</li>
+                        <li>Timestamps should be in standard datetime format (YYYY-MM-DD HH:MM:SS)</li>
+                        <li>Room names will be automatically cleaned and standardized</li>
+                        <li>File names should contain keywords: "Temperature", "Occupancy", "Illuminance", "VOC"</li>
+                    </ul>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="margin-top: 2rem; font-size: 1.2rem; padding: 1rem 2rem;" id="submit-btn" disabled>
+                    <i class="fas fa-rocket"></i>
+                    Process Data & Generate Analysis
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if session.get('uploaded_files') %}
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header" style="background: linear-gradient(135deg, #28a745, #20c997);">
+        <i class="fas fa-check-circle"></i> Current Session Data
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            <strong>Data Successfully Uploaded!</strong>
+            <p style="margin: 0.5rem 0 0 0;">Your sensor data has been processed and is ready for analysis. You can now:</p>
+            <ul style="margin: 0.5rem 0 0 1.5rem;">
+                <li>View the <a href="{{ url_for('overview') }}" style="color: #667eea; font-weight: bold;">Global Overview</a> of all sensor data</li>
+                <li>Explore <a href="{{ url_for('rooms_list') }}" style="color: #667eea; font-weight: bold;">Individual Room Analytics</a></li>
+                <li>Download detailed PDF reports for each room</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="{{ url_for('overview') }}" class="btn btn-primary">
+                <i class="fas fa-chart-bar"></i> View Overview
+            </a>
+            <a href="{{ url_for('rooms_list') }}" class="btn btn-secondary" style="margin-left: 1rem;">
+                <i class="fas fa-door-open"></i> Browse Rooms
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+    document.getElementById('all-files').addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        const filesList = document.getElementById('files-list');
+        const selectedFilesDiv = document.getElementById('selected-files');
+        const submitBtn = document.getElementById('submit-btn');
+        const label = document.getElementById('file-label-all');
+
+        if (files.length === 0) {
+            selectedFilesDiv.style.display = 'none';
+            submitBtn.disabled = true;
+            label.classList.remove('file-selected');
+            return;
+        }
+
+        // Update label
+        if (files.length === 4) {
+            label.innerHTML = `
+            <i class="fas fa-check-circle" style="margin-bottom: 0.5rem; display: block; font-size: 1.5rem;"></i>
+            <strong>4 Files Selected ✓</strong>
+            <small style="display: block; margin-top: 0.5rem; opacity: 0.8;">Ready to upload</small>
+        `;
+            label.classList.add('file-selected');
+            submitBtn.disabled = false;
+        } else {
+            label.innerHTML = `
+            <i class="fas fa-exclamation-triangle" style="margin-bottom: 0.5rem; display: block; font-size: 1.5rem;"></i>
+            <strong>${files.length} Files Selected</strong>
+            <small style="display: block; margin-top: 0.5rem; opacity: 0.8;">Need exactly 4 files</small>
+        `;
+            label.classList.remove('file-selected');
+            submitBtn.disabled = true;
+        }
+
+        // Show selected files
+        filesList.innerHTML = '';
+        files.forEach(file => {
+            const fileType = getFileType(file.name);
+            const fileDiv = document.createElement('div');
+            fileDiv.style.cssText = 'background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;';
+
+            fileDiv.innerHTML = `
+            <div style="color: ${getFileTypeColor(fileType)}; font-size: 1.5rem; margin-bottom: 0.5rem;">
+                <i class="${getFileTypeIcon(fileType)}"></i>
+            </div>
+            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 0.5rem;">${fileType}</div>
+            <div style="font-size: 0.8rem; color: #6c757d; word-break: break-all;">${file.name}</div>
+            <div style="font-size: 0.8rem; color: #6c757d; margin-top: 0.5rem;">
+                ${(file.size / 1024).toFixed(1)} KB
+            </div>
+        `;
+
+            filesList.appendChild(fileDiv);
+        });
+
+        selectedFilesDiv.style.display = 'block';
+    });
+
+    function getFileType(filename) {
+        const name = filename.toLowerCase();
+        if (name.includes('temperature')) return 'Temperature';
+        if (name.includes('occupancy')) return 'Occupancy';
+        if (name.includes('illuminance')) return 'Illuminance';
+        if (name.includes('voc')) return 'VOC';
+        return 'Unknown';
+    }
+
+    function getFileTypeColor(type) {
+        const colors = {
+            'Temperature': '#e74c3c',
+            'Occupancy': '#2ecc71',
+            'Illuminance': '#f1c40f',
+            'VOC': '#9b59b6',
+            'Unknown': '#95a5a6'
+        };
+        return colors[type] || colors['Unknown'];
+    }
+
+    function getFileTypeIcon(type) {
+        const icons = {
+            'Temperature': 'fas fa-thermometer-half',
+            'Occupancy': 'fas fa-users',
+            'Illuminance': 'fas fa-sun',
+            'VOC': 'fas fa-wind',
+            'Unknown': 'fas fa-file-csv'
+        };
+        return icons[type] || icons['Unknown'];
+    }
+</script>
+
+<style>
+    .upload-area {
+        text-align: center;
+        padding: 2rem;
+        background: #f8fafc;
+        border-radius: 8px;
+        border: 2px dashed #cbd5e0;
+    }
+    
+    .file-input-group {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin: 2rem 0;
+    }
+    
+    .file-input-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .file-input {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+    
+    .file-label {
+        display: block;
+        padding: 2rem;
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .file-label:hover {
+        border-color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .file-selected {
+        background: #f0f9ff;
+        border-color: #667eea;
+    }
+    
+    code {
+        background: #edf2f7;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        font-size: 0.9em;
+        color: #2d3748;
+    }
+    
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn i {
+        font-size: 1.1em;
+    }
+    
+    .alert {
+        border-left: 4px solid;
+    }
+    
+    .alert-info {
+        border-left-color: #3498db;
+    }
+    
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: white;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+    
+    .card-header i {
+        font-size: 1.2em;
+    }
+    
+    @media (max-width: 768px) {
+        .file-input-group {
+            flex-direction: column;
+        }
+        .btn {
+            width: 100%;
+            justify-content: center;
+            margin: 0.5rem 0;
+        }
+    }
+</style>
+{% endblock %}

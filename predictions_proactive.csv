@@ -1,0 +1,5 @@
+timestamp,temperature_t0,humidity_t0,occupancy_t0,temperature_t1,humidity_t1,temperature_t2,humidity_t2,dayofweek,hour,predicted_class,spike_probability
+2025-09-08 23:01:13,23.5,85.0,1,23.0,82.0,22.5,80.0,0,14,Conditions Stable,0.0100
+2025-09-08 23:17:07,23.5,85.0,1,23.0,82.0,22.5,80.0,0,14,Conditions Stable,0.0100
+2025-09-08 23:24:33,23.5,85.0,1,23.0,82.0,22.5,80.0,0,14,Conditions Stable,0.0100
+2025-09-09 17:51:41,23.5,85.0,1,23.0,82.0,22.5,80.0,0,14,Conditions Stable,0.0100

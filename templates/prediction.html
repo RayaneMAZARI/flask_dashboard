@@ -1,0 +1,198 @@
+{% extends "base.html" %} {% block title %}Proactive Spike Prediction{% endblock %} {% block content %}
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-magic"></i> Proactive VOC Spike Prediction
+    </div>
+    <div class="card-body">
+        <p style="font-size: 1.1rem; color: #6c757d; margin-bottom: 2rem;">
+            This model predicts if a VOC spike is likely to occur within the next 3 hours. Enter the environmental conditions for the current hour and the previous two hours.
+        </p>
+
+        <form method="post" class="prediction-form">
+            <div class="time-grid">
+                <!-- Current Hour -->
+                <div class="time-column">
+                    <h4><i class="fas fa-clock"></i> Current Hour (T=0)</h4>
+                    <div class="form-group">
+                        <label for="temperature_t0">Temperature (°C)</label>
+                        <input type="number" id="temperature_t0" name="temperature_t0" class="form-control" step="0.1" required value="{{ inputs.temperature_t0 if inputs else 23.5 }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="humidity_t0">Humidity (%)</label>
+                        <input type="number" id="humidity_t0" name="humidity_t0" class="form-control" step="0.1" required value="{{ inputs.humidity_t0 if inputs else 85.0 }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="occupancy_t0">Occupancy Status</label>
+                        <select id="occupancy_t0" name="occupancy_t0" class="form-control" required>
+                            <option value="1" {% if inputs and inputs.occupancy_t0 == 1 %}selected{% endif %}>Occupied</option>
+                            <option value="0" {% if inputs and inputs.occupancy_t0 == 0 %}selected{% endif %}>Unoccupied</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Previous Hour -->
+                <div class="time-column">
+                    <h4><i class="fas fa-history"></i> 1 Hour Ago (T-1)</h4>
+                    <div class="form-group">
+                        <label for="temperature_t1">Temperature (°C)</label>
+                        <input type="number" id="temperature_t1" name="temperature_t1" class="form-control" step="0.1" required value="{{ inputs.temperature_t1 if inputs else 23.0 }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="humidity_t1">Humidity (%)</label>
+                        <input type="number" id="humidity_t1" name="humidity_t1" class="form-control" step="0.1" required value="{{ inputs.humidity_t1 if inputs else 82.0 }}">
+                    </div>
+                </div>
+
+                <!-- Two Hours Ago -->
+                <div class="time-column">
+                    <h4><i class="fas fa-history"></i> 2 Hours Ago (T-2)</h4>
+                    <div class="form-group">
+                        <label for="temperature_t2">Temperature (°C)</label>
+                        <input type="number" id="temperature_t2" name="temperature_t2" class="form-control" step="0.1" required value="{{ inputs.temperature_t2 if inputs else 22.5 }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="humidity_t2">Humidity (%)</label>
+                        <input type="number" id="humidity_t2" name="humidity_t2" class="form-control" step="0.1" required value="{{ inputs.humidity_t2 if inputs else 80.0 }}">
+                    </div>
+                </div>
+            </div>
+
+            <hr style="margin: 2rem 0;">
+
+            <div class="form-grid">
+                <!-- Day of Week -->
+                <div class="form-group">
+                    <label for="dayofweek"><i class="fas fa-calendar-day"></i> Day of the Week</label>
+                    <select id="dayofweek" name="dayofweek" class="form-control" required>
+                        <option value="0">Monday</option> <option value="1">Tuesday</option> <option value="2">Wednesday</option>
+                        <option value="3">Thursday</option> <option value="4">Friday</option> <option value="5">Saturday</option>
+                        <option value="6">Sunday</option>
+                    </select>
+                </div>
+                <!-- Hour of Day -->
+                <div class="form-group">
+                    <label for="hour"><i class="fas fa-clock"></i> Hour of the Day (0-23)</label>
+                    <input type="number" id="hour" name="hour" class="form-control" min="0" max="23" step="1" required value="{{ inputs.hour if inputs else 14 }}">
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.2rem;">
+                    <i class="fas fa-bolt"></i> Predict Future Spike
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if result %}
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header" style="background: {% if result.prediction_code == 1 %}linear-gradient(135deg, #ff6b6b, #ee5a6f){% else %}linear-gradient(135deg, #28a745, #20c997){% endif %};">
+        <i class="fas fa-chart-pie"></i> Proactive Prediction Result
+    </div>
+    <div class="card-body">
+        <div class="result-grid">
+            <div class="result-summary">
+                <h3 style="margin-bottom: 1rem; color: #2c3e50;">Prediction Outcome</h3>
+                <div class="alert {% if result.prediction_code == 1 %}alert-danger{% else %}alert-info{% endif %}" style="text-align: center; padding: 2rem;">
+                    <i class="fas {% if result.prediction_code == 1 %}fa-exclamation-triangle{% else %}fa-check-circle{% endif %}" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h2 style="font-size: 2.5rem;">{{ result.prediction_text }}</h2>
+
+                    {% if result.prediction_code == 1 %}
+                    <p style="font-size: 1rem; margin-top: 0.5rem;">(Spike likely within 3 hours)</p>
+                    {% else %}
+                    <p style="font-size: 1rem; margin-top: 0.5rem;">(Conditions are expected to remain stable)</p>
+                    {% endif %}
+                </div>
+
+                <!-- THIS IS THE CORRECTED SECTION -->
+                <div style="margin-top: 1.5rem; text-align: center;">
+                    {% if result.prediction_code == 1 %}
+                    <p style="color: #6c757d; font-size: 1.1rem;">The model predicts a
+                        <strong>{{ "%.2f"|format(result.probability * 100) }}%</strong> probability of a future spike.
+                    </p>
+                    {% else %}
+                    <p style="color: #6c757d; font-size: 1.1rem;">The model is
+                        <strong>{{ "%.2f"|format((1 - result.probability) * 100) }}%</strong> confident that conditions will remain stable.
+                    </p>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            {% if result.plot_url %}
+            <div class="plot-container">
+                <h4 style="margin-bottom: 1rem; color: #2c3e50; text-align: center;">
+                    <i class="fas fa-chart-bar"></i> Prediction Probability
+                </h4>
+                <img src="{{ url_for('static', filename=result.plot_url) }}" alt="Prediction Probability Plot">
+            </div>
+            {% endif %}
+        </div>
+        <div style="text-align: center; margin-top: 2rem; border-top: 1px solid #dee2e6; padding-top: 1.5rem;">
+            <a href="{{ url_for('download_predictions') }}" class="btn btn-secondary">
+                <i class="fas fa-download"></i> Download All Predictions (CSV)
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<style>
+    .prediction-form .time-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+    }
+    
+    .prediction-form .time-column {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+    }
+    
+    .prediction-form .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .prediction-form .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .prediction-form .form-group label {
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #4a5568;
+    }
+    
+    .prediction-form .form-group label i {
+        margin-right: 8px;
+        color: #667eea;
+    }
+    
+    .prediction-form .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #cbd5e0;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+    
+    .result-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        align-items: center;
+    }
+    
+    @media (max-width: 768px) {
+        .result-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

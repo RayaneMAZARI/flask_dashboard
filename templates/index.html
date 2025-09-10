@@ -1,0 +1,100 @@
+{% extends "base.html" %} {% block title %}Home - Sensor Analytics Dashboard{% endblock %} {% block content %}
+<div class="hero-section">
+    <h1 class="hero-title">
+        <i class="fas fa-sensors"></i> Smart Building Analytics Dashboard
+    </h1>
+    <p class="hero-subtitle">
+        Comprehensive sensor data analysis for temperature, occupancy, illuminance, and air quality monitoring in smart buildings
+    </p>
+
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-thermometer-half"></i>
+            </div>
+            <h3 class="feature-title">Temperature Monitoring</h3>
+            <p class="feature-description">Track and analyze temperature patterns across all rooms with detailed daily profiles, trends analysis, and correlation with occupancy data for optimal climate control.</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h3 class="feature-title">Occupancy Analysis</h3>
+            <p class="feature-description">Monitor room usage patterns by time periods, weekdays vs weekends, with intelligent detection algorithms and persistence filtering to reduce false positives.</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-lightbulb"></i>
+            </div>
+            <h3 class="feature-title">Light Level Tracking</h3>
+            <p class="feature-description">Analyze illuminance levels throughout the day and optimize lighting schedules based on occupancy data to improve energy efficiency and user comfort.</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-wind"></i>
+            </div>
+            <h3 class="feature-title">Air Quality Monitoring</h3>
+            <p class="feature-description">Detect VOC spikes and monitor air quality trends with intelligent anomaly detection to ensure healthy indoor environments and optimize ventilation systems.</p>
+        </div>
+    </div>
+
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        <strong>How It Works:</strong>
+        <ol style="margin: 0.5rem 0 0 1.5rem;">
+            <li>Upload your 4 CSV sensor data files (Temperature, Occupancy, Illuminance, VOC)</li>
+            <li>The system processes and analyzes all data with advanced algorithms</li>
+            <li>View global overview charts showing patterns across all rooms</li>
+            <li>Explore detailed room-specific analytics and correlations</li>
+            <li>Download comprehensive PDF reports for each room</li>
+        </ol>
+    </div>
+
+    <div style="margin-top: 2rem;">
+        <a href="{{ url_for('upload') }}" class="btn btn-primary" style="font-size: 1.2rem; padding: 1rem 2rem;">
+            <i class="fas fa-upload"></i> Start Analysis - Upload Data
+        </a>
+    </div>
+
+    <div class="developer-credit">
+        <i class="fas fa-code"></i>
+        <strong>Developed by Rayane</strong> - Advanced Sensor Analytics Platform
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-rocket"></i> Getting Started
+    </div>
+    <div class="card-body">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;">
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; color: #667eea; margin-bottom: 1rem;">
+                    <i class="fas fa-upload"></i>
+                </div>
+                <h4 style="margin-bottom: 1rem; color: #2c3e50;">1. Upload Data</h4>
+                <p style="color: #6c757d;">Upload your 4 CSV files containing sensor data from all rooms</p>
+            </div>
+
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; color: #667eea; margin-bottom: 1rem;">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <h4 style="margin-bottom: 1rem; color: #2c3e50;">2. Process & Analyze</h4>
+                <p style="color: #6c757d;">Advanced algorithms process your data and generate insights</p>
+            </div>
+
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; color: #667eea; margin-bottom: 1rem;">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h4 style="margin-bottom: 1rem; color: #2c3e50;">3. Explore Results</h4>
+                <p style="color: #6c757d;">View comprehensive analytics and download detailed reports</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

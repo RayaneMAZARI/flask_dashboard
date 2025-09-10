@@ -1,0 +1,176 @@
+{% extends "base.html" %} {% block title %}{{ room_name }} - Room Analysis{% endblock %} {% block content %}
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-home"></i> {{ room_name }} - Detailed Sensor Analysis
+    </div>
+    <div class="card-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap;">
+            <p style="font-size: 1.1rem; color: #6c757d; margin: 0;">
+                Comprehensive analysis of all sensor data for room <strong>{{ room_name }}</strong>
+            </p>
+            <a href="{{ url_for('download_report', room_name=room_name) }}" class="btn btn-primary">
+                <i class="fas fa-file-pdf"></i> Download PDF Report
+            </a>
+        </div>
+
+        <!-- Temperature Analysis -->
+        {% if plot_urls.temp_daily %}
+        <div class="card" style="margin-bottom: 2rem;">
+            <div class="card-header" style="background: linear-gradient(135deg, #ff6b6b, #ee5a6f);">
+                <i class="fas fa-thermometer-half"></i> Temperature Analysis
+            </div>
+            <div class="card-body">
+                <div class="plot-container">
+                    <h4 style="margin-bottom: 1rem; color: #2c3e50;">
+                        <i class="fas fa-chart-line"></i> Daily Temperature Profile
+                    </h4>
+                    <p style="color: #6c757d; margin-bottom: 1rem;">
+                        Average temperature variations throughout a typical day in {{ room_name }}.
+                    </p>
+                    <img src="{{ url_for('static', filename=plot_urls.temp_daily) }}" alt="Daily Temperature Profile for {{ room_name }}">
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Occupancy Analysis -->
+        {% if plot_urls.occ_avg %}
+        <div class="card" style="margin-bottom: 2rem;">
+            <div class="card-header" style="background: linear-gradient(135deg, #4ecdc4, #44a08d);">
+                <i class="fas fa-users"></i> Occupancy Analysis
+            </div>
+            <div class="card-body">
+                <div class="plot-container">
+                    <h4 style="margin-bottom: 1rem; color: #2c3e50;">
+                        <i class="fas fa-chart-area"></i> Average Occupancy Rate by Time Period
+                    </h4>
+                    <p style="color: #6c757d; margin-bottom: 1rem;">
+                        Room usage patterns comparing weekdays vs weekends across different time periods.
+                    </p>
+                    <img src="{{ url_for('static', filename=plot_urls.occ_avg) }}" alt="Occupancy Analysis for {{ room_name }}">
+                </div>
+
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Occupancy Insights:</strong>
+                    <ul style="margin: 0.5rem 0 0 1.5rem;">
+                        <li>Percentages show how much time the room was occupied during each period</li>
+                        <li>Weekday vs weekend patterns help identify usage trends</li>
+                        <li>Early morning and late evening periods use stricter detection thresholds</li>
+                        <li>Data includes smart filtering to reduce false positives from brief movements</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Temperature vs Occupancy Correlation -->
+        {% if plot_urls.temp_vs_occ %}
+        <div class="card" style="margin-bottom: 2rem;">
+            <div class="card-header" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                <i class="fas fa-balance-scale"></i> Temperature vs Occupancy Correlation
+            </div>
+            <div class="card-body">
+                <div class="plot-container">
+                    <h4 style="margin-bottom: 1rem; color: #2c3e50;">
+                        <i class="fas fa-chart-line"></i> Temperature and Occupancy by Time Period
+                    </h4>
+                    <p style="color: #6c757d; margin-bottom: 1rem;">
+                        Analysis showing the relationship between room temperature and occupancy patterns throughout different periods.
+                    </p>
+                    <img src="{{ url_for('static', filename=plot_urls.temp_vs_occ) }}" alt="Temperature vs Occupancy for {{ room_name }}">
+                </div>
+
+                <div class="alert alert-info">
+                    <i class="fas fa-lightbulb"></i>
+                    <strong>Correlation Insights:</strong>
+                    <ul style="margin: 0.5rem 0 0 1.5rem;">
+                        <li>Top chart shows occupancy percentages for each time period</li>
+                        <li>Bottom chart displays corresponding average temperatures</li>
+                        <li>Look for patterns where high occupancy correlates with temperature changes</li>
+                        <li>This analysis helps optimize HVAC scheduling based on actual usage</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- VOC Air Quality -->
+        {% if plot_urls.voc_evo %}
+        <div class="card">
+            <div class="card-header" style="background: linear-gradient(135deg, #48dbfb, #0abde3);">
+                <i class="fas fa-wind"></i> Air Quality Monitoring (VOC)
+            </div>
+            <div class="card-body">
+                <div class="plot-container">
+                    <h4 style="margin-bottom: 1rem; color: #2c3e50;">
+                        <i class="fas fa-chart-line"></i> VOC Evolution and Spike Detection
+                    </h4>
+                    <p style="color: #6c757d; margin-bottom: 1rem;">
+                        Volatile Organic Compounds (VOC) levels over time with automated spike detection for air quality monitoring.
+                    </p>
+                    <img src="{{ url_for('static', filename=plot_urls.voc_evo) }}" alt="VOC Evolution for {{ room_name }}">
+                </div>
+
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Air Quality Notes:</strong>
+                    <ul style="margin: 0.5rem 0 0 1.5rem;">
+                        <li>Red dots indicate VOC spikes above 300 ppb threshold</li>
+                        <li>Spikes may indicate poor ventilation, cleaning activities, or other air quality issues</li>
+                        <li>Monitor patterns to identify recurring air quality problems</li>
+                        <li>Consider ventilation improvements if frequent spikes are detected</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- No Data Message -->
+        {% if not plot_urls.temp_daily and not plot_urls.occ_avg and not plot_urls.temp_vs_occ and not plot_urls.voc_evo %}
+        <div style="text-align: center; padding: 3rem;">
+            <i class="fas fa-chart-line" style="font-size: 3rem; color: #6c757d; margin-bottom: 1rem;"></i>
+            <h3 style="color: #2c3e50; margin-bottom: 1rem;">No Data Available</h3>
+            <p style="color: #7f8c8d; margin-bottom: 2rem;">
+                Unable to generate analytics for room <strong>{{ room_name }}</strong>. This may be due to:
+            </p>
+            <div class="alert alert-warning" style="text-align: left; max-width: 500px; margin: 0 auto;">
+                <ul style="margin: 0;">
+                    <li>Insufficient sensor data for this room</li>
+                    <li>Data processing errors</li>
+                    <li>Room name mismatch between different sensor files</li>
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Navigation -->
+        <div style="text-align: center; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #dee2e6;">
+            <a href="{{ url_for('rooms_list') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Rooms List
+            </a>
+            <a href="{{ url_for('overview') }}" class="btn btn-secondary" style="margin-left: 1rem;">
+                <i class="fas fa-chart-bar"></i> Global Overview
+            </a>
+            {% if plot_urls.temp_daily or plot_urls.occ_avg or plot_urls.temp_vs_occ or plot_urls.voc_evo %}
+            <a href="{{ url_for('download_report', room_name=room_name) }}" class="btn btn-primary" style="margin-left: 1rem;">
+                <i class="fas fa-download"></i> Download Report
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    @media (max-width: 768px) {
+        .card-body>div:first-child {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .plot-container img {
+            width: 100%;
+            height: auto;
+        }
+    }
+</style>
+{% endblock %}

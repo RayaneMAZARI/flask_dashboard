@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Overview - Sensor Analytics Dashboard{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-chart-line"></i>
+        Global Sensor Data Overview
+    </div>
+    <div class="card-body">
+        <p style="font-size: 1.1rem; color: #6c757d; margin-bottom: 2rem;">
+            This overview provides a comprehensive analysis of all sensor data across all rooms and time periods.
+        </p>
+
+        <!-- Temperature Section -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <div class="card-header" style="background: linear-gradient(135deg, #ff6b6b, #ee5a6f);">
+                <i class="fas fa-thermometer-half"></i>
+                Temperature Analysis
+            </div>
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem;">
+                    {% if plot_urls.temp_dist %}
+                    <div class="plot-container">
+                        <h4 style="margin-bottom: 1rem; color: #2c3e50;">
+                            <i class="fas fa-chart-area"></i>
+                            Temperature Distribution
+                        </h4>
+                        <img src="{{ url_for('static', filename=plot_urls.temp_dist) }}" alt="Temperature Distribution">
+                    </div>
+                    {% endif %}
+                    
+                    {% if plot_urls.temp_avg_room %}
+                    <div class="plot-container">
+                        <h4 style="margin-bottom: 1rem; color: #2c3e50;">
+                            <i class="fas fa-chart-bar"></i>
+                            Average Temperature by Room
+                        </h4>
+                        <img src="{{ url_for('static', filename=plot_urls.temp_avg_room) }}" alt="Average Temperature by Room">
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Illuminance Section -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <div class="card-header" style="background: linear-gradient(135deg, #feca57, #ff9ff3);">
+                <i class="fas fa-lightbulb"></i>
+                Illuminance Analysis
+            </div>
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem;">
+                    {% if plot_urls.ill_dist %}
+                    <div class="plot-container">
+                        <h4 style="margin-bottom: 1rem; color: #2c3e50;">
+                            <i class="fas fa-chart-area"></i>
+                            Illuminance Distribution
+                        </h4>
+                        <img src="{{ url_for('static', filename=plot_urls.ill_dist) }}" alt="Illuminance Distribution">
+                    </div>
+                    {% endif %}
+                    
+                    {% if plot_urls.ill_avg_hour %}
+                    <div class="plot-container">
+                        <h4 style="margin-bottom: 1rem; color: #2c3e50;">
+                            <i class="fas fa-clock"></i>
+                            Average Illuminance by Hour
+                        </h4>
+                        <img src="{{ url_for('static', filename=plot_urls.ill_avg_hour) }}" alt="Average Illuminance by Hour">
+                    </div>
+                    {% endif %}
+                    
+                    {% if plot_urls.ill_unoccupied %}
+                    <div class="plot-container">
+                        <h4 style="margin-bottom: 1rem; color: #2c3e50;">
+                            <i class="fas fa-moon"></i>
+                            Illuminance When Unoccupied
+                        </h4>
+                        <img src="{{ url_for('static', filename=plot_urls.ill_unoccupied) }}" alt="Average Illuminance When Unoccupied">
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- VOC Section -->
+        <div class="card">
+            <div class="card-header" style="background: linear-gradient(135deg, #48dbfb, #0abde3);">
+                <i class="fas fa-wind"></i>
+                VOC Air Quality Analysis
+            </div>
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem;">
+                    {% if plot_urls.voc_dist %}
+                    <div class="plot-container">
+                        <h4 style="margin-bottom: 1rem; color: #2c3e50;">
+                            <i class="fas fa-chart-area"></i>
+                            VOC Distribution
+                        </h4>
+                        <img src="{{ url_for('static', filename=plot_urls.voc_dist) }}" alt="VOC Distribution">
+                    </div>
+                    {% endif %}
+                    
+                    {% if plot_urls.voc_avg_room %}
+                    <div class="plot-container">
+                        <h4 style="margin-bottom: 1rem; color: #2c3e50;">
+                            <i class="fas fa-chart-bar"></i>
+                            Average VOC by Room
+                        </h4>
+                        <img src="{{ url_for('static', filename=plot_urls.voc_avg_room) }}" alt="Average VOC by Room">
+                    </div>
+                    {% endif %}
+                    
+                    {% if plot_urls.voc_spikes_weekday %}
+                    <div class="plot-container">
+                        <h4 style="margin-bottom: 1rem; color: #2c3e50;">
+                            <i class="fas fa-calendar-week"></i>
+                            VOC Spikes by Weekday
+                        </h4>
+                        <img src="{{ url_for('static', filename=plot_urls.voc_spikes_weekday) }}" alt="VOC Spikes by Weekday">
+                    </div>
+                    {% endif %}
+                    
+                    {% if plot_urls.voc_spikes_hour %}
+                    <div class="plot-container">
+                        <h4 style="margin-bottom: 1rem; color: #2c3e50;">
+                            <i class="fas fa-clock"></i>
+                            VOC Spikes by Hour
+                        </h4>
+                        <img src="{{ url_for('static', filename=plot_urls.voc_spikes_hour) }}" alt="VOC Spikes by Hour">
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-info" style="margin-top: 2rem;">
+            <i class="fas fa-info-circle"></i>
+            <strong>Analysis Summary:</strong>
+            <p style="margin: 0.5rem 0 0 0;">
+                This overview shows global patterns across all rooms and sensors. For detailed room-specific analysis, 
+                visit the <a href="{{ url_for('rooms_list') }}" style="color: #667eea; text-decoration: none; font-weight: bold;">Rooms section</a> 
+                to explore individual room analytics and download detailed reports.
+            </p>
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="{{ url_for('rooms_list') }}" class="btn btn-primary">
+                <i class="fas fa-door-open"></i>
+                Explore Individual Rooms
+            </a>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary" style="margin-left: 1rem;">
+                <i class="fas fa-upload"></i>
+                Upload New Data
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
